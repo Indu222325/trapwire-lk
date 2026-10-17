@@ -34,6 +34,13 @@ def main():
     new_target = shifted[shifted.scam_type == "digital_id_scam"]
     caught = (model.predict(new_target.text) != "legit").mean()
 
+    # Split the test score into wording seen in training vs wording never seen
+    unseen_mask = ~test.template_id.isin(set(train.template_id))
+    seen_m, _, _ = evaluate(model, test[~unseen_mask])
+    unseen_m, _, _ = evaluate(model, test[unseen_mask])
+    test_metrics["seen_wording"] = {k: seen_m[k] for k in ("n", "accuracy", "scam_recall")}
+    test_metrics["unseen_wording"] = {k: unseen_m[k] for k in ("n", "accuracy", "scam_recall")}
+
     labels = sorted(test.scam_type.unique())
     report = {
         "baseline_naive_bayes_on_test": base_metrics,
@@ -51,6 +58,8 @@ def main():
     print("TrapWire v1 held-out test   :", {k: test_metrics[k] for k in
                                             ("accuracy", "macro_f1", "scam_recall", "scam_precision")})
     print("  by language              :", test_metrics["accuracy_by_language"])
+    print("  seen wording             :", test_metrics["seen_wording"])
+    print("  unseen wording           :", test_metrics["unseen_wording"])
     print("v1 on SHIFTED set           :", {k: shift_metrics[k] for k in ("mean_confidence", "scam_recall")},
           "(test mean_confidence was", test_metrics["mean_confidence"], ")")
     print(f"v1 flags {caught:.0%} of the new SL-UDI digital-ID scams as not legit")
