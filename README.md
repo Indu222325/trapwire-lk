@@ -125,8 +125,10 @@ No dataset was provided, so all data was **generated during the build window** b
 | **Scam recall** (scams caught) | 100% | **100%** |
 | **Scam precision** (flagged messages that are scams) | 100% | **100%** |
 | False alarms on legitimate messages | 0 | **0** |
-| Scam-type accuracy (6 classes) | 87.4% | **89.5%** |
-| Scam-type macro-F1 | 0.866 | **0.892** |
+| Scam-type accuracy (6 classes) | 89.5% | **89.5%** |
+| Scam-type macro-F1 | 0.889 | **0.892** |
+
+We keep logistic regression over the slightly simpler Naive Bayes baseline because it matches it on accuracy, has a higher macro-F1, gives better-calibrated probabilities (the drift signals and the review threshold rely on confidence), and exposes per-word weights we show to users as "key words".
 
 **Honest breakdown by wording**
 
@@ -152,7 +154,7 @@ What this shows: TrapWire separates scams from legitimate messages reliably, but
 
 | | Model v1 (before) | Model v2 (after review + retraining) |
 |---|---|---|
-| Mean confidence on shifted traffic | 0.71 (reference 0.87) | ~0.92 |
+| Mean confidence on shifted traffic | 0.69 (reference 0.88) | ~0.92 |
 | Accuracy on shifted messages not used for retraining | ~51% | ~89% |
 | Held-out test macro-F1 (regression guard) | 0.892 | ~0.93 (no regression) |
 
@@ -176,7 +178,7 @@ Status is **DRIFT** when two or more signals are at drift level, **WARNING** whe
 1. **Alert:** a CRITICAL alert is logged and shown on the dashboard, naming the signals that fired.
 2. **Safe fallback:** safe mode raises the review threshold from 0.60 to 0.75, so uncertain messages are shown as *"Suspicious: verify with the official number"* rather than a confident wrong answer.
 3. **Human review:** every Suspicious message enters the review queue.
-4. **Controlled retraining:** after 30 reviewed labels, a challenger model is trained on the training data plus reviewed messages. It is promoted only if held-out test macro-F1 drops by no more than 0.02 **and** accuracy on unseen shifted messages improves. Otherwise it is rejected and the current model stays active. Every decision is logged in the alerts and the model registry.
+4. **Controlled retraining:** after 20 reviewed labels, a challenger model is trained on the training data plus reviewed messages. It is promoted only if held-out test macro-F1 drops by no more than 0.02 **and** accuracy on unseen shifted messages improves. Otherwise it is rejected and the current model stays active. Every decision is logged in the alerts and the model registry.
 
 **Drift demo (in the web app, Monitoring tab):** ① normal traffic → all signals normal · ② SL-UDI scam wave → DRIFT, alert, safe mode · ③ review queue labelled · ④ retrain → v2 promoted · ② again → signals return to normal.
 

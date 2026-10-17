@@ -219,7 +219,7 @@ function setPill(s){ const p=$("statusPill"); p.className="pill "+s; p.textConte
 async function refreshPill(){ try{ const m=await api("/api/monitor"); setPill(m.status); $("revBadge").textContent=m.reviews.pending?`(${m.reviews.pending})`:""; }catch(e){} }
 
 async function replay(ds){ toast(ds==="test"?"Sending normal traffic…":"Sending the new SL-UDI scam wave…");
-  const r = await api("/api/demo/replay",{method:"POST",body:JSON.stringify({dataset:ds,n:60})});
+  const r = await api("/api/demo/replay",{method:"POST",body:JSON.stringify({dataset:ds,n:ds==='shifted'?80:60})});
   toast(`Sent ${r.sent}: ${r.verdicts.Scam} scam, ${r.verdicts.Suspicious} suspicious, ${r.verdicts.Safe} safe. Status: <b>${r.status}</b>`); loadMonitor(); }
 async function autoReview(){ const r=await api("/api/demo/auto_review",{method:"POST"}); toast(`Simulated reviewer labelled ${r.labelled} messages`); loadMonitor(); loadReview(); }
 async function retrain(){ toast("Training challenger model…");

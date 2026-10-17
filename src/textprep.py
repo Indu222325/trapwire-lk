@@ -8,7 +8,11 @@ MONEY_RE = re.compile(r"\b(rs\.?|rupees|රු\.?|ரூ\.?)\s*[\d,]+", re.I)
 DIGIT_RE = re.compile(r"\d")
 LEET_MAP = str.maketrans({"@": "a", "0": "o", "1": "i", "3": "e", "$": "s", "4": "a"})
 SPACED_RE = re.compile(r"\b(?:[A-Za-z@$0-9] ){2,}[A-Za-z@$0-9]\b")
-TOKEN_RE = re.compile(r"[^\W_]+", re.UNICODE)
+# Sinhala and Tamil vowel signs are combining marks that \w does not match,
+# so the script ranges and the zero-width joiner are added explicitly.
+INDIC = "\u0D80-\u0DFF\u0B80-\u0BFF\u200c\u200d"
+TOKEN_RE = re.compile(rf"[^\W_]+(?:[{INDIC}\w]*)|[{INDIC}]+", re.UNICODE)
+TOKEN_PATTERN = rf"(?u)[\w{INDIC}]{{2,}}"
 
 SINGLISH_HINTS = {"oyage", "oya", "eka", "karanna", "ewanna", "nathnam", "salli", "wela", "machan",
                   "ada", "ganna", "danna", "kiyala", "thiyenne", "nemei", "amma", "mama", "ba", "ekata"}
@@ -40,7 +44,7 @@ def normalize(text: str) -> str:
     t = " ".join(w.translate(LEET_MAP) if w.isascii() and re.search(r"[a-zA-Z]", w) else w
                  for w in t.split())
     t = DIGIT_RE.sub("0", t)
-    t = re.sub(r"[^\w\s]", " ", t)  # drop emoji and punctuation
+    t = re.sub(rf"[^\w\s{INDIC}]", " ", t)  # drop emoji and punctuation, keep Sinhala/Tamil marks
     return re.sub(r"\s+", " ", t).strip().lower()
 
 

@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import FeatureUnion, Pipeline
 
-from src.textprep import normalize, tokens
+from src.textprep import TOKEN_PATTERN, normalize, tokens
 
 ROOT = Path(__file__).resolve().parents[1]
 MODELS = ROOT / "models"
@@ -22,7 +22,8 @@ CONF_BINS = np.array([0.0, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1.01])
 
 def build_pipeline():
     features = FeatureUnion([
-        ("word", TfidfVectorizer(preprocessor=normalize, ngram_range=(1, 2), min_df=2, sublinear_tf=True)),
+        ("word", TfidfVectorizer(preprocessor=normalize, token_pattern=TOKEN_PATTERN, ngram_range=(1, 2),
+                                 min_df=2, sublinear_tf=True)),
         ("char", TfidfVectorizer(preprocessor=normalize, analyzer="char_wb", ngram_range=(2, 5),
                                  min_df=2, sublinear_tf=True, max_features=60000)),
     ])
@@ -31,7 +32,7 @@ def build_pipeline():
 
 
 def build_baseline():
-    return Pipeline([("tfidf", TfidfVectorizer(preprocessor=normalize)), ("clf", MultinomialNB())])
+    return Pipeline([("tfidf", TfidfVectorizer(preprocessor=normalize, token_pattern=TOKEN_PATTERN)), ("clf", MultinomialNB())])
 
 
 def scam_metrics(y_true, y_pred):

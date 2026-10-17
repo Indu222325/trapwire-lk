@@ -48,7 +48,7 @@ def test_drift_detect_review_retrain_loop():
     m = c.get("/api/monitor").json()
     assert m["status"] == "DRIFT" and m["safe_mode"] is True
     assert any(a["level"] == "CRITICAL" for a in m["alerts"])
-    assert c.post("/api/demo/auto_review").json()["labelled"] >= 30
+    assert c.post("/api/demo/auto_review").json()["labelled"] >= 20
     out = c.post("/api/retrain").json()
     assert out["promoted"] is True
     assert out["unseen_shifted"]["challenger_accuracy"] > out["unseen_shifted"]["champion_accuracy"]
