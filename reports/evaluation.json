@@ -1,0 +1,174 @@
+{
+  "baseline_naive_bayes_on_test": {
+    "n": 1192,
+    "accuracy": 0.8951,
+    "macro_f1": 0.889,
+    "mean_confidence": 0.8204,
+    "scam_recall": 1.0,
+    "scam_precision": 1.0,
+    "missed_scams": 0,
+    "false_alarms": 0,
+    "accuracy_by_language": {
+      "en": 0.9235,
+      "si": 0.8221,
+      "singlish": 1.0,
+      "ta": 0.8084,
+      "tanglish": 1.0
+    }
+  },
+  "v1_on_heldout_test": {
+    "n": 1192,
+    "accuracy": 0.8951,
+    "macro_f1": 0.8921,
+    "mean_confidence": 0.8796,
+    "scam_recall": 1.0,
+    "scam_precision": 1.0,
+    "missed_scams": 0,
+    "false_alarms": 0,
+    "accuracy_by_language": {
+      "en": 0.9235,
+      "si": 0.8221,
+      "singlish": 1.0,
+      "ta": 0.8084,
+      "tanglish": 1.0
+    },
+    "seen_wording": {
+      "n": 592,
+      "accuracy": 1.0,
+      "scam_recall": 1.0
+    },
+    "unseen_wording": {
+      "n": 600,
+      "accuracy": 0.7917,
+      "scam_recall": 1.0
+    }
+  },
+  "v1_on_shifted_set": {
+    "n": 1022,
+    "macro_f1": 0.5202,
+    "mean_confidence": 0.6904,
+    "scam_recall": 0.9584,
+    "scam_precision": 0.9226,
+    "missed_scams": 31,
+    "false_alarms": 60,
+    "accuracy_by_language": {
+      "en": 0.4797,
+      "si": 0.5278,
+      "singlish": 0.4318,
+      "ta": 0.5,
+      "tanglish": 0.5055
+    }
+  },
+  "v1_digital_id_scams_flagged_as_not_legit": 0.9333,
+  "per_class_report_test": {
+    "bank_impersonation": {
+      "precision": 0.8798076923076923,
+      "recall": 0.8798076923076923,
+      "f1-score": 0.8798076923076923,
+      "support": 208.0
+    },
+    "legit": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 260.0
+    },
+    "lottery_scam": {
+      "precision": 0.6453900709219859,
+      "recall": 1.0,
+      "f1-score": 0.7844827586206896,
+      "support": 182.0
+    },
+    "parcel_scam": {
+      "precision": 1.0,
+      "recall": 0.7175141242937854,
+      "f1-score": 0.8355263157894737,
+      "support": 177.0
+    },
+    "pension_scam": {
+      "precision": 1.0,
+      "recall": 0.8603351955307262,
+      "f1-score": 0.924924924924925,
+      "support": 179.0
+    },
+    "welfare_scam": {
+      "precision": 1.0,
+      "recall": 0.8655913978494624,
+      "f1-score": 0.9279538904899135,
+      "support": 186.0
+    },
+    "accuracy": 0.8951342281879194,
+    "macro avg": {
+      "precision": 0.920866293871613,
+      "recall": 0.8872080683302777,
+      "f1-score": 0.892115930355449,
+      "support": 1192.0
+    },
+    "weighted avg": {
+      "precision": 0.924883383311914,
+      "recall": 0.8951342281879194,
+      "f1-score": 0.8991820513056946,
+      "support": 1192.0
+    }
+  },
+  "confusion_matrix_test": {
+    "labels": [
+      "bank_impersonation",
+      "legit",
+      "lottery_scam",
+      "parcel_scam",
+      "pension_scam",
+      "welfare_scam"
+    ],
+    "matrix": [
+      [
+        183,
+        0,
+        25,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        260,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        182,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        50,
+        127,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        25,
+        0,
+        154,
+        0
+      ],
+      [
+        25,
+        0,
+        0,
+        0,
+        0,
+        161
+      ]
+    ]
+  }
+}

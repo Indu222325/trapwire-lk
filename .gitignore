@@ -8,3 +8,4 @@ logs/
 .env
 data/*.csv
 *.zip
+.pytest_cache/
