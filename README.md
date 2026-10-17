@@ -105,7 +105,7 @@ No dataset was provided, so all data was **generated during the build window** b
 
 | Set | Rows | Contents |
 |---|---|---|
-| `data/train.csv` | 2,368 | 6 classes (bank impersonation, welfare, pension, parcel, lottery, legit) in English, Sinhala, Tamil, Singlish and Tanglish |
+| `data/train.csv` | 3,808 | 6 classes (bank impersonation, welfare, pension, parcel, lottery, legit) in English, Sinhala, Tamil, Singlish and Tanglish: 2,368 template messages + 1,440 compositional augmentations |
 | `data/test.csv` | 1,192 | **Held-out test set.** Half the messages use wording templates that never appear in training, so the score measures generalisation, not memorisation |
 | `data/shifted.csv` | 1,022 | **Drift set.** A new impersonation target (fake **SL-UDI digital ID** messages), heavier Singlish/Tanglish mixing, and old scams obfuscated with leetspeak, emoji and spaced letters |
 
@@ -122,29 +122,41 @@ No dataset was provided, so all data was **generated during the build window** b
 
 | Metric | Naive Bayes baseline | TrapWire v1 |
 |---|---|---|
-| **Scam recall** (scams caught) | 94.6% | **94.6%** |
+| **Scam recall** (scams caught) | 100% | **100%** |
 | **Scam precision** (flagged messages that are scams) | 100% | **100%** |
 | False alarms on legitimate messages | 0 | **0** |
-| Scam-type accuracy (6 classes) | 76.9% | 74.8% |
-| Scam-type macro-F1 | 0.754 | 0.734 |
+| Scam-type accuracy (6 classes) | 87.4% | **89.5%** |
+| Scam-type macro-F1 | 0.866 | **0.892** |
 
 **Honest breakdown by wording**
 
 | Test subset | Messages | Scam-type accuracy | Scam recall |
 |---|---|---|---|
 | Wording seen in training | 592 | 100% | 100% |
-| Wording **never seen** in training | 600 | 50% | 90% |
+| Wording **never seen** in training | 600 | 79.2% | 100% |
 
-What this shows: TrapWire reliably separates scams from legitimate messages, even with new wording (90% recall, no false alarms), but it often names the wrong scam *type* when the wording is new. That is exactly why the product monitors itself and keeps humans in the loop instead of trusting launch-day accuracy. Full per-class results and the confusion matrix are in `reports/evaluation.json`.
+**By language (scam-type accuracy):** English 92.4%, Sinhala 82.2%, Tamil 80.8%, Singlish 100%, Tanglish 100%.
+
+**Model iterations**
+
+| Iteration | Change | Type accuracy | Unseen-wording accuracy |
+|---|---|---|---|
+| 1 | TF-IDF word + char n-grams, logistic regression, template data only | 74.8% | 50.0% |
+| 2 | + compositional augmentation (opener + claim + action + deadline in 4 languages), training set only | **89.5%** | **79.2%** |
+
+The test and shifted sets are identical across iterations (generated from a separate random stream), so the gain is real generalisation, not a change in the test.
+
+What this shows: TrapWire separates scams from legitimate messages reliably, but it still names the wrong scam *type* for about one in five messages with new wording, and real messages will be harder than synthetic ones. That is why the product monitors itself and keeps humans in the loop instead of trusting launch-day accuracy. Full per-class results and the confusion matrix are in `reports/evaluation.json`.
 
 **Before drift response vs after (shifted set)**
 
 | | Model v1 (before) | Model v2 (after review + retraining) |
 |---|---|---|
-| Mean confidence on shifted traffic | 0.64 (reference 0.76) | ~0.90 |
-| Accuracy on shifted messages not used for retraining | ~50% | ~98% |
+| Mean confidence on shifted traffic | 0.71 (reference 0.87) | ~0.92 |
+| Accuracy on shifted messages not used for retraining | ~51% | ~89% |
+| Held-out test macro-F1 (regression guard) | 0.892 | ~0.93 (no regression) |
 
-v2 numbers come from the live demo loop (`/api/retrain` output, also covered by `tests/test_api.py`); exact values vary slightly with the replay sample.
+v2 numbers come from the live demo loop (`/api/retrain` output, also checked in `tests/test_api.py`); exact values vary slightly with the replay sample.
 
 ## 7. Monitoring and drift response
 
@@ -178,7 +190,7 @@ See [IMPACT.md](IMPACT.md).
 
 - All data is synthetic. Real scam messages are more varied, so real-world accuracy will differ until the model is trained on labelled reports from a partner (for example a bank fraud desk or the CBSL/CERT reporting channel).
 - In the demo, "human review" is simulated with the synthetic ground truth; in production it would be trained bank or telco staff.
-- Scam-type accuracy on unseen wording is 50%; the scam-vs-legitimate decision is the one users act on.
+- Scam-type accuracy on unseen wording is 79%; Sinhala and Tamil type accuracy (81–82%) is lower than English and Singlish.
 
 ## 10. AI tools used
 

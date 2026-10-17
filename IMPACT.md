@@ -27,7 +27,7 @@ The Central Bank's "Be Scam Proof" campaign (June 2026) names senior citizens, r
 
 ## How we will measure it
 
-1. **Scams caught:** share of reported scams TrapWire flags (target: at least 90%, our current held-out recall is 94.6%).
+1. **Scams caught:** share of reported scams TrapWire flags (target: at least 90%; current recall on our synthetic held-out test is 100%).
 2. **False alarms:** legitimate messages wrongly flagged (current: 0 on the held-out test set).
 3. **Time to adapt:** hours from a new scam wave appearing to an alert and a reviewed, retrained model (demo: one review cycle).
 4. **Money protected:** reported losses avoided, estimated with the pilot partner's fraud-case data.

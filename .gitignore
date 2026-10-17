@@ -7,3 +7,4 @@ models/ACTIVE
 logs/
 .env
 data/*.csv
+*.zip

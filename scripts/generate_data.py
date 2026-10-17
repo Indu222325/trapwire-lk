@@ -270,6 +270,114 @@ DRIFT = {
     },
 }
 
+
+# ---------------------------------------------------------------------------
+# Compositional augmentation (training only). Messages are assembled from
+# interchangeable parts (opener + class-specific claim + call to action +
+# deadline) so the model learns what each scam TYPE is about rather than
+# memorising whole templates. Added in iteration 2 after v1 scored only 50%
+# scam-type accuracy on unseen wording.
+# ---------------------------------------------------------------------------
+AUG = {
+    "en": {
+        "open": ["Dear customer,", "URGENT:", "Notice:", "Final reminder:", "Attention:", "{bank} alert:", ""],
+        "bank_impersonation": ["your account will be closed", "unusual activity was found on your card",
+                               "your mobile banking is locked", "your account needs re-verification",
+                               "a payment from your account is on hold"],
+        "welfare_scam": ["your Aswesuma allowance is waiting", "your welfare payment could not be released",
+                         "your family qualifies for a relief grant", "your Aswesuma registration is incomplete"],
+        "pension_scam": ["your pension payment is on hold", "your monthly pension will be stopped",
+                         "pension arrears are ready for you", "your pension file must be renewed"],
+        "parcel_scam": ["your package could not be delivered", "a parcel in your name is held at customs",
+                        "your courier item is awaiting payment", "your shipment will be returned"],
+        "lottery_scam": ["you are the winner of our lucky draw", "your mobile number won a cash prize",
+                         "a reward of Rs. {prize} is reserved for you", "you have been chosen for a special prize"],
+        "act": ["Click {link} now", "Visit {link} to continue", "Call {phone} immediately", "Reply with your OTP",
+                "Send your NIC and bank PIN", "Pay a fee of Rs. {fee} to {phone}", "Confirm your details at {link}"],
+        "due": ["within 24 hours.", "today.", "before midnight.", "or lose access.", ""],
+        "legit": ["Your payment of Rs. {amount} was successful.", "Thank you for your payment.",
+                  "Your appointment is confirmed for {time}.", "Your OTP is {otp}. Never share it.",
+                  "Please collect your documents from the office tomorrow.", "Call me when you are free.",
+                  "Your bill for this month is ready. Pay at any authorised outlet.", "See you at {time}."],
+    },
+    "singlish": {
+        "open": ["Hadisi:", "Awadhanayi:", "Dear customer,", "{bank}:", ""],
+        "bank_impersonation": ["oyage account eka close wenawa", "card eke suspicious activity ekak",
+                               "mobile banking eka lock wela", "account eka ayeth verify karanna ona",
+                               "oyage payment ekak hold karala"],
+        "welfare_scam": ["oyage Aswesuma salli enna thiyenawa", "welfare payment eka release karanna ba",
+                         "oyage pawulata relief salli ekak", "Aswesuma registration eka sampurna na"],
+        "pension_scam": ["oyage pension payment eka hold karala", "masika pension eka nawathinawa",
+                         "pension arrears salli ready", "pension file eka renew karanna ona"],
+        "parcel_scam": ["oyage package eka deliver karanna ba", "oyage namata parcel ekak customs eke",
+                        "courier item ekata payment ekak ona", "shipment eka return wenawa"],
+        "lottery_scam": ["oya lucky draw eke winner", "oyage number ekata cash prize ekak",
+                         "Rs. {prize} reward ekak oyata", "oyawa special prize ekata thoragena"],
+        "act": ["{link} click karanna", "{phone} ekata call karanna", "OTP eka reply karanna",
+                "NIC saha PIN eka ewanna", "Rs. {fee} fee eka {phone} ekata ewanna", "{link} eke details confirm karanna"],
+        "due": ["ada ma.", "paya 24k athula.", "nathnam access nathi wenawa.", ""],
+        "legit": ["Oyage payment eka sarthakai.", "Appointment eka {time} ta confirm.",
+                  "Heta office ekata enna documents ganna.", "Free unama call ekak denna.",
+                  "OTP eka {otp}. Share karanna epa.", "Machan heta hambemu."],
+    },
+    "si": {
+        "open": ["දැනුම්දීම:", "හදිසි:", "{bank}:", ""],
+        "bank_impersonation": ["ඔබගේ ගිණුම වසා දැමේ", "ඔබගේ කාඩ්පතේ සැක සහිත ක්‍රියාකාරකමක්",
+                               "ඔබගේ ජංගම බැංකු සේවාව අගුළු දමා ඇත", "ඔබගේ ගිණුම නැවත තහවුරු කළ යුතුය"],
+        "welfare_scam": ["ඔබගේ අස්වැසුම දීමනාව රැඳී ඇත", "සුබසාධන ගෙවීම නිකුත් කළ නොහැක",
+                         "ඔබගේ පවුලට සහන දීමනාවක්", "අස්වැසුම ලියාපදිංචිය අසම්පූර්ණයි"],
+        "pension_scam": ["ඔබගේ විශ්‍රාම වැටුප රඳවා ඇත", "මාසික විශ්‍රාම වැටුප නතර වේ",
+                         "විශ්‍රාම හිඟ මුදල් සූදානම්", "විශ්‍රාම ලිපිගොනුව අලුත් කළ යුතුය"],
+        "parcel_scam": ["ඔබගේ පැකේජය බෙදා හැරිය නොහැක", "ඔබගේ නමින් පාර්සලයක් රේගුවේ",
+                        "කුරියර් භාණ්ඩයට ගෙවීමක් අවශ්‍යයි", "භාණ්ඩය ආපසු යවනු ලැබේ"],
+        "lottery_scam": ["ඔබ වාසනා දිනුම් ඇදීමේ ජයග්‍රාහකයා", "ඔබගේ අංකයට මුදල් ත්‍යාගයක්",
+                         "රු. {prize} ත්‍යාගයක් ඔබට වෙන් කර ඇත", "ඔබ විශේෂ ත්‍යාගයකට තෝරාගෙන ඇත"],
+        "act": ["{link} ක්ලික් කරන්න", "{phone} අමතන්න", "OTP අංකය එවන්න", "ජාතික හැඳුනුම්පත් අංකය සහ PIN එවන්න",
+                "රු. {fee} ගාස්තුව {phone} අංකයට එවන්න", "{link} හි විස්තර තහවුරු කරන්න"],
+        "due": ["අදම.", "පැය 24ක් ඇතුළත.", ""],
+        "legit": ["ඔබගේ ගෙවීම සාර්ථකයි.", "ඔබගේ හමුව {time}ට තහවුරු කර ඇත.",
+                  "හෙට කාර්යාලයට පැමිණ ලේඛන ලබා ගන්න.", "OTP අංකය {otp}. කිසිවෙකුට නොදෙන්න.",
+                  "පුතා, මට කතා කරන්න."],
+    },
+    "ta": {
+        "open": ["அறிவிப்பு:", "அவசரம்:", "{bank}:", ""],
+        "bank_impersonation": ["உங்கள் கணக்கு மூடப்படும்", "உங்கள் அட்டையில் சந்தேகமான செயல்பாடு",
+                               "உங்கள் மொபைல் வங்கி பூட்டப்பட்டுள்ளது", "உங்கள் கணக்கை மீண்டும் சரிபார்க்க வேண்டும்"],
+        "welfare_scam": ["உங்கள் அஸ்வெசும கொடுப்பனவு காத்திருக்கிறது", "நலன்புரி கொடுப்பனவை விடுவிக்க முடியவில்லை",
+                         "உங்கள் குடும்பத்திற்கு நிவாரண மானியம்", "அஸ்வெசும பதிவு முழுமையடையவில்லை"],
+        "pension_scam": ["உங்கள் ஓய்வூதிய கொடுப்பனவு நிறுத்தி வைக்கப்பட்டுள்ளது", "மாதாந்த ஓய்வூதியம் நிறுத்தப்படும்",
+                         "ஓய்வூதிய நிலுவைத் தொகை தயார்", "ஓய்வூதிய கோப்பை புதுப்பிக்க வேண்டும்"],
+        "parcel_scam": ["உங்கள் பொதியை வழங்க முடியவில்லை", "உங்கள் பெயரில் ஒரு பார்சல் சுங்கத்தில் உள்ளது",
+                        "கூரியர் பொருளுக்கு கட்டணம் தேவை", "பொதி திருப்பி அனுப்பப்படும்"],
+        "lottery_scam": ["நீங்கள் அதிர்ஷ்ட குலுக்கலில் வென்றீர்கள்", "உங்கள் எண்ணுக்கு பணப் பரிசு",
+                         "ரூ. {prize} பரிசு உங்களுக்காக", "நீங்கள் சிறப்பு பரிசுக்கு தேர்வு செய்யப்பட்டுள்ளீர்கள்"],
+        "act": ["{link} ஐ கிளிக் செய்யவும்", "{phone} ஐ அழைக்கவும்", "OTP எண்ணை அனுப்பவும்",
+                "அடையாள அட்டை எண்ணும் PIN உம் அனுப்பவும்", "ரூ. {fee} கட்டணத்தை {phone} க்கு அனுப்பவும்",
+                "{link} இல் விவரங்களை உறுதிப்படுத்தவும்"],
+        "due": ["இன்றே.", "24 மணி நேரத்திற்குள்.", ""],
+        "legit": ["உங்கள் கொடுப்பனவு வெற்றிகரமாக முடிந்தது.", "உங்கள் சந்திப்பு {time} க்கு உறுதிப்படுத்தப்பட்டது.",
+                  "நாளை அலுவலகத்திற்கு வந்து ஆவணங்களைப் பெறவும்.", "உங்கள் OTP {otp}. யாருக்கும் கொடுக்க வேண்டாம்."],
+    },
+}
+SCAM_CLASSES = ["bank_impersonation", "welfare_scam", "pension_scam", "parcel_scam", "lottery_scam"]
+
+
+def augment(rng, n_per_class_lang):
+    rows = []
+    for lang, parts in AUG.items():
+        for cls in SCAM_CLASSES + ["legit"]:
+            for _ in range(n_per_class_lang):
+                if cls == "legit":
+                    k = rng.choice([1, 1, 2])
+                    text = " ".join(rng.sample(parts["legit"], k))
+                else:
+                    text = " ".join(x for x in [rng.choice(parts["open"]), rng.choice(parts[cls]) + ".",
+                                                rng.choice(parts["act"]), rng.choice(parts["due"])] if x)
+                rows.append({"text": fill(text, rng), "label": is_scam(cls), "scam_type": cls,
+                             "lang": lang, "template_id": f"aug:{cls}:{lang}"})
+    return rows
+
+
 LEET = {"a": "@", "o": "0", "i": "1", "e": "3", "s": "$"}
 EMOJI = ["🚨", "⚠️", "✅", "🎁", "💰", "👉", "🔒"]
 
@@ -340,6 +448,11 @@ def main():
         if r["label"] == 1:
             r["text"] = obfuscate(r["text"], rng)
     shifted = pd.DataFrame(drift_rows + old).sample(frac=1, random_state=SEED)
+
+    # Iteration 2: add compositional augmentation to TRAINING only (separate
+    # random stream, so test and shifted sets are unchanged)
+    aug_rows = pd.DataFrame(augment(random.Random(SEED + 1), 60))
+    train = pd.concat([train, aug_rows]).sample(frac=1, random_state=SEED)
 
     cols = ["text", "label", "scam_type", "lang", "template_id"]
     train[cols].to_csv(DATA / "train.csv", index=False)
