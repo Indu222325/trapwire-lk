@@ -59,6 +59,7 @@ class State:
         self.lock = threading.Lock()
         self.load(self.active_version())
         self.last_status = "OK"
+        self.labels_used = 0  # reviewed labels already used by the last retraining
 
     @staticmethod
     def active_version():
@@ -190,7 +191,8 @@ def get_monitor():
         "timeline": monitor.timeline(store.all_predictions()),
         "alerts": store.alerts(),
         "reviews": {"pending": counts.get("pending", 0), "done": done},
-        "retrain_ready": done >= monitor.RETRAIN_MIN_REVIEWS,
+        "retrain_ready": done - S.labels_used >= monitor.RETRAIN_MIN_REVIEWS,
+        "new_reviews": done - S.labels_used,
         "retrain_min_reviews": monitor.RETRAIN_MIN_REVIEWS,
         "total_predictions": len(store.all_predictions()),
     }
@@ -212,8 +214,10 @@ def retrain():
     """Controlled retraining: train a challenger on train.csv + human-reviewed
     labels, and promote it only if it does not regress on the held-out test set."""
     reviewed = pd.DataFrame(store.reviewed_examples())
-    if len(reviewed) < monitor.RETRAIN_MIN_REVIEWS:
-        raise HTTPException(400, f"Need at least {monitor.RETRAIN_MIN_REVIEWS} reviewed messages, have {len(reviewed)}.")
+    new = len(reviewed) - S.labels_used
+    if new < monitor.RETRAIN_MIN_REVIEWS:
+        raise HTTPException(400, f"Need at least {monitor.RETRAIN_MIN_REVIEWS} NEW reviewed messages since the last "
+                                 f"retraining, have {new}.")
     train = pd.read_csv(ROOT / "data" / "train.csv")
     test = pd.read_csv(ROOT / "data" / "test.csv")
     shifted = pd.read_csv(ROOT / "data" / "shifted.csv")
@@ -222,7 +226,7 @@ def retrain():
     # Reviewed messages are weighted up (repeated) so a small batch can teach a new pattern
     new_train = pd.concat([train, *[extra] * 3], ignore_index=True)
 
-    n = len([p for p in MODELS.glob("v*.joblib")]) + 1
+    n = max(int(p.stem[1:]) for p in MODELS.glob("v*.joblib")) + 1
     version = f"v{n}"
     champion_test = S.meta["test_metrics"]
     challenger, meta = train_and_save(new_train, test, version,
@@ -233,7 +237,8 @@ def retrain():
         champ_shift, _, _ = evaluate(S.model, unseen_shift)
     chall_shift, _, _ = evaluate(challenger, unseen_shift)
     regression = champion_test["macro_f1"] - meta["test_metrics"]["macro_f1"]
-    promote = regression <= MAX_F1_REGRESSION and chall_shift["accuracy"] >= champ_shift["accuracy"]
+    promote = regression <= MAX_F1_REGRESSION and chall_shift["accuracy"] > champ_shift["accuracy"]
+    S.labels_used = len(reviewed)
     result = {
         "challenger": version, "champion": S.version, "promoted": promote,
         "reviewed_used": int(len(reviewed)),
@@ -302,6 +307,7 @@ def reset():
     with S.lock:
         S.load("v1")
     S.last_status = "OK"
+    S.labels_used = 0
     for f in MODELS.glob("v*.joblib"):
         if f.stem != "v1":
             f.unlink()

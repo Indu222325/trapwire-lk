@@ -53,3 +53,14 @@ def test_drift_detect_review_retrain_loop():
     assert out["promoted"] is True
     assert out["unseen_shifted"]["challenger_accuracy"] > out["unseen_shifted"]["champion_accuracy"]
     c.post("/api/demo/reset")
+
+
+def test_retrain_needs_new_labels():
+    c.post("/api/demo/reset")
+    c.post("/api/demo/replay", json={"dataset": "test", "n": 60})
+    c.post("/api/demo/replay", json={"dataset": "shifted", "n": 80})
+    c.post("/api/demo/auto_review")
+    assert c.post("/api/retrain").status_code == 200
+    # the same labels cannot trigger a second retraining
+    assert c.post("/api/retrain").status_code == 400
+    c.post("/api/demo/reset")

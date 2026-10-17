@@ -209,7 +209,7 @@ async function loadMonitor(){
   $("response").innerHTML = `
     <span>Safe mode (stricter threshold)</span><b style="color:${m.safe_mode?"var(--red)":"var(--green)"}">${m.safe_mode?"ON":"off"}</b>
     <span>Waiting for human review</span><b>${m.reviews.pending}</b>
-    <span>Reviewed labels collected</span><b>${m.reviews.done} / ${m.retrain_min_reviews}</b>
+    <span>New reviewed labels</span><b>${m.new_reviews} / ${m.retrain_min_reviews}</b>
     <span>Retraining</span><b style="color:${m.retrain_ready?"var(--green)":"var(--muted)"}">${m.retrain_ready?"ready":"needs more labels"}</b>`;
   $("retrainBtn").disabled = !m.retrain_ready;
   $("alerts").innerHTML = m.alerts.length ? m.alerts.slice(0,6).map(a=>`<div class="alert ${a.level}"><b>${a.level}</b> · ${new Date(a.ts*1000).toLocaleTimeString()}<br>${esc(a.message)}</div>`).join("") : `<div class="muted">No alerts.</div>`;
