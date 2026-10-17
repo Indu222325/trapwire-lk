@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrapWire LK</title>
+<style>
+  :root{--bg:#0b0f0c;--panel:#121915;--panel2:#18221c;--line:#24332a;--text:#e6efe8;--muted:#8fa396;
+        --green:#8cf05a;--green2:#4caf50;--red:#ff5d5d;--amber:#ffc24b;--blue:#6cc4ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:16px 24px;border-bottom:1px solid var(--line);background:#0e1410;position:sticky;top:0;z-index:5}
+  .logo{font-weight:800;font-size:22px;letter-spacing:.5px}.logo span{color:var(--green)}
+  .tag{color:var(--muted);font-size:13px}
+  .pill{margin-left:auto;padding:6px 12px;border-radius:99px;font-weight:700;font-size:13px;border:1px solid var(--line)}
+  .OK{color:var(--green);border-color:var(--green2)} .WARNING{color:var(--amber);border-color:var(--amber)}
+  .DRIFT{color:#fff;background:var(--red);border-color:var(--red);animation:pulse 1.2s infinite}
+  .WARMING_UP{color:var(--muted)}
+  @keyframes pulse{50%{opacity:.6}}
+  nav{display:flex;gap:4px;padding:0 24px;border-bottom:1px solid var(--line);background:#0e1410}
+  nav button{background:none;border:0;color:var(--muted);padding:12px 16px;font:inherit;font-weight:600;cursor:pointer;border-bottom:2px solid transparent}
+  nav button.on{color:var(--green);border-color:var(--green)}
+  main{max-width:1150px;margin:0 auto;padding:24px}
+  .tab{display:none}.tab.on{display:block}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1.2fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:850px){.g2,.g4{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  h2{margin:0 0 4px;font-size:18px} h3{margin:0 0 10px;font-size:15px;color:var(--muted);font-weight:600}
+  textarea{width:100%;min-height:130px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;resize:vertical}
+  .btn{background:var(--green);color:#0b0f0c;border:0;border-radius:9px;padding:10px 16px;font-weight:700;cursor:pointer;font:inherit;font-weight:700}
+  .btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+  .btn.red{background:var(--red);color:#fff}.btn:disabled{opacity:.45;cursor:not-allowed}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chips button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:5px 11px;font-size:12px;cursor:pointer}
+  .verdict{font-size:30px;font-weight:800;margin:4px 0}
+  .v-Scam{color:var(--red)}.v-Safe{color:var(--green)}.v-Suspicious{color:var(--amber)}
+  .muted{color:var(--muted);font-size:13px}
+  .bar{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:6px 0 12px}.bar i{display:block;height:100%}
+  .reasons span{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;margin:2px;font-size:12px}
+  .warn{background:var(--panel2);border-left:3px solid var(--amber);padding:10px 12px;border-radius:6px;margin-top:10px}
+  .sig .v{font-size:26px;font-weight:800}.sig.ok{border-color:#2e4a37}.sig.warn{border-color:var(--amber)}.sig.drift{border-color:var(--red);background:#2a1414}
+  .lvl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+  .ok .lvl{color:var(--green)}.warn .lvl{color:var(--amber)}.drift .lvl{color:var(--red)}
+  canvas{width:100%;height:240px;display:block}
+  .alert{padding:9px 12px;border-radius:8px;margin-bottom:8px;font-size:13px;background:var(--panel2);border-left:3px solid var(--blue)}
+  .alert.CRITICAL{border-color:var(--red)}.alert.WARNING{border-color:var(--amber)}.alert.INFO{border-color:var(--green)}
+  table{width:100%;border-collapse:collapse;font-size:13px} td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{color:var(--muted);font-weight:600}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px}
+  .legend span{font-size:12px;margin-right:12px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--panel2);border:1px solid var(--green2);padding:12px 16px;border-radius:10px;max-width:420px;display:none;z-index:9}
+  .kv{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}.kv b{text-align:right}
+  .synthetic{font-size:11px;color:var(--muted);margin-left:8px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Trap<span>Wire</span> LK</div>
+  <div class="tag">Multilingual scam detection that notices when scammers change tactics</div>
+  <div id="statusPill" class="pill WARMING_UP">Monitoring…</div>
+</header>
+<nav>
+  <button class="on" data-tab="check">Check a message</button>
+  <button data-tab="monitor">Monitoring &amp; drift</button>
+  <button data-tab="review">Human review <span id="revBadge"></span></button>
+  <button data-tab="models">Models</button>
+</nav>
+<main>
+
+<!-- CHECK -->
+<section id="check" class="tab on">
+  <div class="grid g2">
+    <div class="card">
+      <h2>Paste a suspicious SMS or WhatsApp message</h2>
+      <p class="muted">Works in Sinhala, Tamil, English, Singlish and Tanglish. All examples are synthetic.</p>
+      <textarea id="msg" placeholder="Paste message here…"></textarea>
+      <div class="row chips" style="margin:10px 0" id="examples"></div>
+      <button class="btn" id="checkBtn">Check message</button>
+    </div>
+    <div class="card" id="result">
+      <h3>Result</h3>
+      <p class="muted">The verdict, scam type, confidence and a warning in the sender's language will appear here.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MONITOR -->
+<section id="monitor" class="tab">
+  <div class="card" style="margin-bottom:16px">
+    <div class="row" style="justify-content:space-between">
+      <div><h2>Live drift monitor <span class="muted" id="modelTag"></span></h2>
+        <div class="muted" id="winInfo"></div></div>
+      <div class="row">
+        <button class="btn ghost" onclick="replay('test')">① Normal traffic</button>
+        <button class="btn red" onclick="replay('shifted')">② New scam wave (SL-UDI)</button>
+        <button class="btn ghost" onclick="autoReview()">③ Review queue</button>
+        <button class="btn" id="retrainBtn" onclick="retrain()">④ Retrain</button>
+        <button class="btn ghost" onclick="resetDemo()">Reset</button>
+      </div>
+    </div>
+  </div>
+  <div class="grid g4" id="signals"></div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h3>Rolling signals (window of 30 predictions)</h3>
+      <canvas id="chart" width="700" height="240"></canvas>
+      <div class="legend"><span><i style="background:var(--green)"></i>Confidence</span>
+        <span><i style="background:var(--amber)"></i>Unknown-word share</span>
+        <span><i style="background:var(--red)"></i>Sent to review</span>
+        <span class="muted">dashed line = model change</span></div>
+    </div>
+    <div class="card">
+      <h3>Drift response</h3>
+      <div class="kv" id="response"></div>
+      <h3 style="margin-top:16px">Alerts</h3>
+      <div id="alerts"></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEW -->
+<section id="review" class="tab">
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <div><h2>Human review queue</h2>
+      <p class="muted">Messages the model was unsure about. Reviewed labels feed controlled retraining.</p></div>
+      <button class="btn ghost" onclick="autoReview()">Auto-label with simulated reviewer</button>
+    </div>
+    <table><thead><tr><th>#</th><th>Message</th><th>Model guess</th><th>Label</th></tr></thead><tbody id="revRows"></tbody></table>
+  </div>
+</section>
+
+<!-- MODELS -->
+<section id="models" class="tab">
+  <div class="card">
+    <h2>Model registry</h2>
+    <p class="muted">A retrained challenger is promoted only if it does not regress on the held-out test set.</p>
+    <table><thead><tr><th>Version</th><th>Trained</th><th>Train rows</th><th>Held-out macro-F1</th><th>Notes</th><th></th></tr></thead><tbody id="modelRows"></tbody></table>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Last retraining decision</h3><pre id="retrainOut" class="muted" style="white-space:pre-wrap">No retraining yet.</pre></div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const EX = [
+  ["Bank (Singlish)","Oyage CUB account eka block karala thiyenne. Ikmanata verify karanna http://secure-verify.example/482"],
+  ["Aswesuma (Sinhala)","අස්වැසුම දීමනාව රු. 15,000 ලබා ගැනීමට ඔබගේ විස්තර http://claim-gov-lk.example/311 හි ඇතුලත් කරන්න."],
+  ["Pension (Tamil)","உங்கள் ஓய்வூதியம் நிறுத்தப்பட்டுள்ளது. உடனே 071-xxx-4821 ஐ அழைக்கவும்."],
+  ["Real OTP","Your OTP is 482913. Do not share it with anyone. The bank will never ask for your OTP."],
+  ["NEW: SL-UDI","SL-UDI digital ID eka register karanne ada antima dawasa. Biometric update eka http://gov-lk-verify.example/77 eke karanna"],
+];
+const $ = id => document.getElementById(id);
+const api = async (p, o={}) => { const r = await fetch(p, {headers:{"Content-Type":"application/json"}, ...o});
+  if(!r.ok){ const t = await r.json().catch(()=>({detail:r.statusText})); throw new Error(t.detail||r.statusText);} return r.json(); };
+const toast = t => { const e=$("toast"); e.innerHTML=t; e.style.display="block"; clearTimeout(e._t); e._t=setTimeout(()=>e.style.display="none",5000); };
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pretty = s => s.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase());
+
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on", x===b));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on", t.id===b.dataset.tab));
+  if(b.dataset.tab==="review") loadReview(); if(b.dataset.tab==="models") loadModels(); if(b.dataset.tab==="monitor") loadMonitor();
+});
+EX.forEach(([n,t]) => { const b=document.createElement("button"); b.textContent=n; b.onclick=()=>$("msg").value=t; $("examples").appendChild(b); });
+
+$("checkBtn").onclick = async () => {
+  const text = $("msg").value.trim(); if(!text) return;
+  const r = await api("/api/check", {method:"POST", body:JSON.stringify({text})});
+  const pct = Math.round(r.confidence*100), col = r.verdict==="Scam"?"var(--red)":r.verdict==="Safe"?"var(--green)":"var(--amber)";
+  $("result").innerHTML = `<h3>Result <span class="synthetic">model ${r.model_version} · language: ${r.lang}</span></h3>
+    <div class="verdict v-${r.verdict}">${r.verdict}</div>
+    <div>Type: <b>${pretty(r.pred)}</b></div>
+    <div class="muted" style="margin-top:8px">Confidence ${pct}% (review threshold ${Math.round(r.threshold*100)}%${r.safe_mode?", safe mode ON":""})</div>
+    <div class="bar"><i style="width:${pct}%;background:${col}"></i></div>
+    ${r.reasons.length?`<div class="muted">Key words</div><div class="reasons">${r.reasons.map(w=>`<span>${esc(w)}</span>`).join("")}</div>`:""}
+    <div class="warn">${esc(r.warning)}</div>
+    ${r.verdict==="Suspicious"?`<p class="muted">Sent to the human review queue (#${r.id}).</p>`:""}`;
+  refreshPill();
+};
+
+function signalCard(key, s){
+  const fmt = v => v===null||v===undefined ? "–" : (key==="psi" ? v.toFixed(2) : Math.round(v*100)+"%");
+  return `<div class="card sig ${s.level}"><div class="lvl">${s.level==="ok"?"Normal":s.level==="warn"?"Warning":"Drift"}</div>
+    <div class="v">${fmt(s.value)}</div><div class="muted">${s.label}</div>
+    <div class="muted">${key==="psi"?"alert at 0.25 (when confidence falls)":key==="review_share"?"alert at 35%":"reference "+fmt(s.reference)}</div></div>`;
+}
+
+function drawChart(tl){
+  const c=$("chart"), x=c.getContext("2d"), W=c.width, H=c.height, P=28;
+  x.clearRect(0,0,W,H); x.strokeStyle="#24332a"; x.fillStyle="#8fa396"; x.font="11px sans-serif";
+  for(let i=0;i<=4;i++){ const y=P+(H-2*P)*i/4; x.beginPath(); x.moveTo(P,y); x.lineTo(W-8,y); x.stroke(); x.fillText((100-25*i)+"%",0,y+4); }
+  if(tl.length<2){ x.fillText("Send traffic to see the rolling signals",W/2-100,H/2); return; }
+  const X=i=>P+(W-P-8)*i/(tl.length-1), Y=v=>P+(H-2*P)*(1-v);
+  for(let i=1;i<tl.length;i++) if(tl[i].version!==tl[i-1].version){ x.setLineDash([4,4]); x.strokeStyle="#6cc4ff"; x.beginPath(); x.moveTo(X(i),P); x.lineTo(X(i),H-P); x.stroke(); x.setLineDash([]); x.fillStyle="#6cc4ff"; x.fillText(tl[i].version,X(i)+4,P+10); }
+  [["confidence","#8cf05a"],["unknown","#ffc24b"],["review","#ff5d5d"]].forEach(([k,col])=>{
+    x.strokeStyle=col; x.lineWidth=2.2; x.beginPath(); tl.forEach((p,i)=>i?x.lineTo(X(i),Y(p[k])):x.moveTo(X(i),Y(p[k]))); x.stroke(); x.lineWidth=1; });
+}
+
+async function loadMonitor(){
+  const m = await api("/api/monitor");
+  setPill(m.status);
+  $("modelTag").textContent = `· active model ${m.model.version}`;
+  $("winInfo").textContent = m.status==="WARMING_UP" ? `Collecting predictions: ${m.window_size}/${m.needed} needed before drift is judged` :
+     `Judging the last ${m.window_size} predictions of ${m.model.version} · ${m.total_predictions} predictions logged`;
+  $("signals").innerHTML = Object.entries(m.signals||{}).map(([k,s])=>signalCard(k,s)).join("") ||
+     `<div class="card muted" style="grid-column:1/-1">Press ① to send normal traffic through the service.</div>`;
+  drawChart(m.timeline);
+  $("response").innerHTML = `
+    <span>Safe mode (stricter threshold)</span><b style="color:${m.safe_mode?"var(--red)":"var(--green)"}">${m.safe_mode?"ON":"off"}</b>
+    <span>Waiting for human review</span><b>${m.reviews.pending}</b>
+    <span>Reviewed labels collected</span><b>${m.reviews.done} / ${m.retrain_min_reviews}</b>
+    <span>Retraining</span><b style="color:${m.retrain_ready?"var(--green)":"var(--muted)"}">${m.retrain_ready?"ready":"needs more labels"}</b>`;
+  $("retrainBtn").disabled = !m.retrain_ready;
+  $("alerts").innerHTML = m.alerts.length ? m.alerts.slice(0,6).map(a=>`<div class="alert ${a.level}"><b>${a.level}</b> · ${new Date(a.ts*1000).toLocaleTimeString()}<br>${esc(a.message)}</div>`).join("") : `<div class="muted">No alerts.</div>`;
+  $("revBadge").textContent = m.reviews.pending ? `(${m.reviews.pending})` : "";
+}
+function setPill(s){ const p=$("statusPill"); p.className="pill "+s; p.textContent = {OK:"Monitoring: OK",WARNING:"Monitoring: WARNING",DRIFT:"⚠ DRIFT DETECTED",WARMING_UP:"Monitoring: warming up"}[s]||s; }
+async function refreshPill(){ try{ const m=await api("/api/monitor"); setPill(m.status); $("revBadge").textContent=m.reviews.pending?`(${m.reviews.pending})`:""; }catch(e){} }
+
+async function replay(ds){ toast(ds==="test"?"Sending normal traffic…":"Sending the new SL-UDI scam wave…");
+  const r = await api("/api/demo/replay",{method:"POST",body:JSON.stringify({dataset:ds,n:60})});
+  toast(`Sent ${r.sent}: ${r.verdicts.Scam} scam, ${r.verdicts.Suspicious} suspicious, ${r.verdicts.Safe} safe. Status: <b>${r.status}</b>`); loadMonitor(); }
+async function autoReview(){ const r=await api("/api/demo/auto_review",{method:"POST"}); toast(`Simulated reviewer labelled ${r.labelled} messages`); loadMonitor(); loadReview(); }
+async function retrain(){ toast("Training challenger model…");
+  try{ const r=await api("/api/retrain",{method:"POST"});
+    $("retrainOut").textContent = JSON.stringify(r,null,2);
+    toast(r.promoted ? `<b>${r.challenger} promoted.</b> New-pattern accuracy ${Math.round(r.unseen_shifted.champion_accuracy*100)}% → ${Math.round(r.unseen_shifted.challenger_accuracy*100)}%`
+                     : `<b>${r.challenger} rejected</b> by the regression guard`);
+  }catch(e){ toast(e.message); } loadMonitor(); }
+async function resetDemo(){ await api("/api/demo/reset",{method:"POST"}); $("retrainOut").textContent="No retraining yet."; toast("Demo reset to model v1"); loadMonitor(); }
+
+async function loadReview(){
+  const r = await api("/api/review");
+  $("revRows").innerHTML = r.items.length ? r.items.map(it=>`<tr><td>${it.id}</td><td>${esc(it.text)}</td>
+    <td>${pretty(it.pred)}<div class="muted">${Math.round(it.confidence*100)}%</div></td>
+    <td><select data-id="${it.id}">${["", ...r.labels].map(l=>`<option value="${l}">${l?pretty(l):"choose…"}</option>`).join("")}</select></td></tr>`).join("")
+    : `<tr><td colspan="4" class="muted">Queue is empty.</td></tr>`;
+  document.querySelectorAll("#revRows select").forEach(s=>s.onchange=async()=>{ if(!s.value) return;
+    await api("/api/review",{method:"POST",body:JSON.stringify({id:+s.dataset.id,label:s.value})}); s.closest("tr").remove(); refreshPill(); });
+}
+async function loadModels(){
+  const ms = await api("/api/models");
+  $("modelRows").innerHTML = ms.map(m=>`<tr><td><b>${m.version}</b></td><td>${m.trained_at}</td><td>${m.train_rows}</td><td>${m.test_macro_f1}</td><td>${esc(m.notes)}</td><td>${m.active?'<b style="color:var(--green)">ACTIVE</b>':""}</td></tr>`).join("");
+}
+refreshPill(); setInterval(()=>{ if($("monitor").classList.contains("on")) loadMonitor(); else refreshPill(); }, 5000);
+</script>
+</body>
+</html>
