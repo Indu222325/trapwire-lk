@@ -195,7 +195,19 @@ def get_monitor():
         "new_reviews": done - S.labels_used,
         "retrain_min_reviews": monitor.RETRAIN_MIN_REVIEWS,
         "total_predictions": len(store.all_predictions()),
+        "verdicts": verdict_counts(store.all_predictions()),
     }
+
+
+def verdict_counts(rows):
+    """How many logged predictions ended as Scam / Suspicious / Safe, and the scam types caught."""
+    out = {"Scam": 0, "Suspicious": 0, "Safe": 0}
+    types = {}
+    for r in rows:
+        out[r["verdict"]] = out.get(r["verdict"], 0) + 1
+        if r["verdict"] == "Scam":
+            types[r["pred"]] = types.get(r["pred"], 0) + 1
+    return {"counts": out, "scam_types": dict(sorted(types.items(), key=lambda kv: -kv[1]))}
 
 
 @app.get("/api/review")

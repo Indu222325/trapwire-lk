@@ -99,6 +99,17 @@
       </div>
     </div>
   </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="row" style="justify-content:space-between;align-items:baseline">
+      <h3 style="margin:0">Verdicts so far</h3>
+      <span class="muted">Counts of screening events in this prototype (synthetic messages), not confirmed real-world fraud.</span>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(4,1fr);margin-top:12px" id="vtiles"></div>
+    <div class="grid g2" style="margin-top:14px">
+      <div><div class="muted" style="margin-bottom:6px">Verdict distribution</div><div id="vbars"></div></div>
+      <div><div class="muted" style="margin-bottom:6px">Scam types caught</div><div id="tbars"></div></div>
+    </div>
+  </div>
   <div class="grid g4" id="signals"></div>
   <div class="grid g2" style="margin-top:16px">
     <div class="card">
@@ -206,6 +217,7 @@ async function loadMonitor(){
   $("signals").innerHTML = Object.entries(m.signals||{}).map(([k,s])=>signalCard(k,s)).join("") ||
      `<div class="card muted" style="grid-column:1/-1">Press ① to send normal traffic through the service.</div>`;
   drawChart(m.timeline);
+  drawVerdicts(m.verdicts, m.total_predictions);
   $("response").innerHTML = `
     <span>Safe mode (stricter threshold)</span><b style="color:${m.safe_mode?"var(--red)":"var(--green)"}">${m.safe_mode?"ON":"off"}</b>
     <span>Waiting for human review</span><b>${m.reviews.pending}</b>
@@ -214,6 +226,20 @@ async function loadMonitor(){
   $("retrainBtn").disabled = !m.retrain_ready;
   $("alerts").innerHTML = m.alerts.length ? m.alerts.slice(0,6).map(a=>`<div class="alert ${a.level}"><b>${a.level}</b> · ${new Date(a.ts*1000).toLocaleTimeString()}<br>${esc(a.message)}</div>`).join("") : `<div class="muted">No alerts.</div>`;
   $("revBadge").textContent = m.reviews.pending ? `(${m.reviews.pending})` : "";
+}
+function hbars(items, colors){
+  const max = Math.max(1, ...items.map(i=>i[1]));
+  return items.length ? items.map(([k,v],i)=>`<div style="display:grid;grid-template-columns:130px 1fr 44px;gap:10px;align-items:center;margin:6px 0">
+    <span style="font-size:13px">${esc(k)}</span>
+    <div style="background:var(--panel2);border-radius:6px;height:16px;overflow:hidden"><div style="height:100%;width:${v/max*100}%;background:${colors[i%colors.length]};border-radius:6px"></div></div>
+    <b style="text-align:right;font-size:13px">${v}</b></div>`).join("") : `<div class="muted">No data yet.</div>`;
+}
+function drawVerdicts(v, total){
+  const c = v.counts;
+  $("vtiles").innerHTML = [["Screened",total,"var(--text)"],["Scam",c.Scam,"var(--red)"],["Suspicious",c.Suspicious,"var(--amber)"],["Safe",c.Safe,"var(--green)"]]
+    .map(([k,n,col])=>`<div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px"><div class="muted">${k}</div><div style="font-size:26px;font-weight:800;color:${col}">${n}</div></div>`).join("");
+  $("vbars").innerHTML = hbars([["Scam",c.Scam],["Suspicious",c.Suspicious],["Safe",c.Safe]], ["var(--red)","var(--amber)","var(--green)"]);
+  $("tbars").innerHTML = hbars(Object.entries(v.scam_types).map(([k,n])=>[pretty(k),n]), ["#8cf05a","#6cc4ff","#c792ea","#ffc24b","#ff8a65","#4dd0e1"]);
 }
 function setPill(s){ const p=$("statusPill"); p.className="pill "+s; p.textContent = {OK:"Monitoring: OK",WARNING:"Monitoring: WARNING",DRIFT:"⚠ DRIFT DETECTED",WARMING_UP:"Monitoring: warming up"}[s]||s; }
 async function refreshPill(){ try{ const m=await api("/api/monitor"); setPill(m.status); $("revBadge").textContent=m.reviews.pending?`(${m.reviews.pending})`:""; }catch(e){} }
